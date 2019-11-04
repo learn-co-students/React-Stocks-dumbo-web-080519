@@ -8,7 +8,8 @@ class MainContainer extends Component {
   state = {
     stocks: [],
     stockItem: [],
-    filter: 'All'
+    filter: 'All',
+    searchValue: 'Default'
   }
 
 // fetching the stocks and set the state of stocks with the value back from fetch
@@ -54,30 +55,60 @@ class MainContainer extends Component {
     })
   }
 
-// Then we use that state to check which object has the same type
-// If it is matched with all, it renders everything
-//
-  filteredStocks = (stocks) => {
-    if(this.state.filter === 'All'){
-    return this.state.stocks
-     }else{
-      return this.state.stocks.filter(stock => stock.type === this.state.filter)
+  handleSortButton = (e) => {
+    console.log("clicked", e.target.value)
+    this.setState({
+      searchValue: e.target.value
+    })
+  }
+
+  sortedStocks = (stocks) => {
+    if(this.state.searchValue === "Alphabetically"){
+      return [...stocks].sort((a,b) => {
+        if (a.name > b.name) {
+          return 1
+        }else if ((a.name < b.name)){
+          return -1
+        } else {
+          return 0
+        }
+      })
+    }else if (this.state.searchValue === "Price"){
+      return [...stocks].sort((a,b) => {
+        if (a.price > b.price) {
+          return 1
+        }else if (a.price < b.price) {
+          return -1
+        }else {
+          return 0
+        }
+      })
+
+    }else{
+      return stocks
     }
+
   }
 
 
 render() {
   // console.log(this.state.stocks)
   // console.log(this.state.stockItem)
-  console.log(this.state.filter)
+  // console.log(this.state.filter)
+
+  // Then we use that state to check which object has the same type
+  // If it is matched with all, it renders everything
+  const filteredStocks = this.state.filter === "All" ? this.state.stocks : this.state.stocks.filter(stock => stock.type === this.state.filter)
+
   return(
     <div>
-      <SearchBar handleFilterButton={this.handleFilterButton}/>
+      <SearchBar handleFilterButton={this.handleFilterButton}
+        handleSortButton={this.handleSortButton}/>
 
       <div className="row">
         <div className="col-8">
           {/* send the state of stocks to StockContainer */}
-          <StockContainer stocks={this.filteredStocks(this.state.stocks)} handleClick={this.handleClick} />
+          <StockContainer stocks={this.sortedStocks(filteredStocks)} handleClick={this.handleClick} />
         </div>
         <div className="col-4">
           {/* we send our stockItem to Portfolio component so that it can render that item whenever something clicked on stock component */}
